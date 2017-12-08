@@ -5,7 +5,7 @@
 <style>
 canvas {
 	border: 1px solid #d3d3d3;
-	background-color: #f1f1f1;
+	background-color: black;
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
@@ -30,19 +30,21 @@ canvas {
 <body onload="startGame()">
 
 <script>
-var player1;
+var goal;
 var ball;
+var player1;
 function startGame() {
   myGameArea.start();
-  ball = new component(40, 40, "ball.svg", 200, 175, "image");
-  player1 = new component(30, 30, "red", 175, 175);
+  goal = new component(100, 200, "#39FF14", 700, 175);
+  ball = new component(40, 40, "ball.png", 200, 175, "image");
+  player1 = new component(30, 30, "cyan", 175, 175);
 }
 
 var myGameArea = {
 	canvas: document.createElement("canvas"),
 	start : function() {
-		this.canvas.width = 600;
-		this.canvas.height = 400;
+		this.canvas.width = 800;
+		this.canvas.height = 500;
 		this.context = this.canvas.getContext("2d");
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 		this.interval = setInterval(updateGameArea, 20);
@@ -71,6 +73,7 @@ function component(width, height, color, x, y, type) {
 	this.y = y;
 	this.update = function(player) {
 		if (type == "image") {
+			ctx = myGameArea.context;
 			ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
 		} else {
 			ctx = myGameArea.context;
@@ -98,11 +101,16 @@ function updateGameArea() {
 			}
 		}
 	}
-	if (player1.x < 0) player1.x = 0;
-	if (player1.y < 0) player1.y = 0;
+	if (player1.x < -player1.width) player1.x = -player1.width;
+	if (player1.y < -player1.height) player1.y = -player1.height;
 	if (player1.x > myGameArea.canvas.width) player1.x = myGameArea.canvas.width;
 	if (player1.y > myGameArea.canvas.height) player1.y = myGameArea.canvas.height;
-	if (ball.x < 0
+	if (ball.x < 0 || ball.y < 0 || ball.x > myGameArea.canvas.width - ball.width || ball.y > myGameArea.canvas.height - ball.height) {
+		document.getElementById("message").text = "Ball Out of Bounds!";
+		ball.x = 200;
+		ball.y = 175;
+	}
+	goal.update();
 	player1.update();
 	ball.update();
 }
