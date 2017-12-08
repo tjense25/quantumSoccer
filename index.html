@@ -25,22 +25,39 @@ canvas {
 <!-- AngularFire -->
 <script src="https://cdn.firebase.com/libs/angularfire/2.1.0/angularfire.min.js"></script>
 <!-- Your Javascript -->
-
+<script src="script.js"></script>
 </head>
 <body onload="startGame()">
 
 <script>
-var goal;
+var goal1;
+var goal2;
 var ball;
 var player1;
-var score;
-var points = 0;
+var player2;
+var uuid = createUUID();
+console.log(uuid);
+var score1;
+var score2;
 function startGame() {
   myGameArea.start();
-  goal = new component(100, 200, "#39FF14", 700, 175);
+  var color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+  goal1 = new component(100, 200, color, 700, 175);
   ball = new component(40, 40, "ball.png", 200, 175, "image");
-  player1 = new component(30, 30, "cyan", 175, 175);
-//  score = new component("30px", "Consolas", "white", 600, 50, "text");
+  player1 = new component(30, 30, color, 175, 175);
+  score1  = new component("30px", "Consolas", "white", 650, 50, "text");
+  var ref = firebase.database().ref('comp')
+  ref.orderByKey().on("child_changed", function(data) {
+	var comp = data.val()
+	if (data.key == "ball") {
+		ball = new component(comp.width, comp.height, comp.color, comp.x, comp.y, comp.type)	
+	} else if (data.key != uuid) {
+		player2 = new component(comp.width, comp.height, comp.color, comp.x, comp.y)
+		goal2 = new component(100, 200, comp.color, 0, 175);
+		score2 = new component("30px", "Consolas", "white", 50, 50, "text");
+	}
+
+  });
 }
 
 var myGameArea = {
@@ -66,11 +83,11 @@ var myGameArea = {
 
 function component(width, height, color, x, y, type) {
 	this.type = type;
+	this.color = color;
+	this.points = 0;
         if (type == "image") {
 		this.image = new Image();
 		this.image.src = color;
-	} else if (type == "text") {
-		ctx.font = this.width + " " + this.height;
 	}
 	this.width = width;
 	this.height = height;
@@ -81,8 +98,9 @@ function component(width, height, color, x, y, type) {
 		if (type == "image") {
 			ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
 		} else if (type == "text") {
+			ctx.font = this.width + " " + this.height;
 			ctx.fillStyle = color;
-			ctx.fillRect(this.x, this.y, this.width, this.height);
+			ctx.fillText(this.text, this.x, this.y);
 		} else {
 			ctx.fillStyle = color;
 			ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -103,15 +121,35 @@ function updateGameArea() {
 			    player1.y >= ball.y - player1.height) {
 				ball.x += 3 * (ball.x - player1.x)
 				ball.y += 3 * (ball.y - player1.y)
+				firebase.database().ref('comp/ball/').set({
+					width: ball.width,
+					height: ball.height,
+					color: ball.color,
+					x: ball.x,
+					y: ball.y,
+					type: "image"
+				});
 			}
 		}
 	}
 	checkPlayerPosition();
 	checkBallPosition();	
-//	score.text = "Score: " + points;
-//	score.update();
-	goal.update();
+	score1.text = "SCORE: " + player1.points;
+	if(score2) score2.text = "SCORE: " + player2.points;
+	firebase.database().ref('comp/' + uuid + '/').set({
+		width: player1.width,
+		height: player1.height,
+		color: player1.color,
+		x: player1.x,
+		y: player1.y,
+		score: player1.points
+	});
+	score1.update();
+	goal1.update();
 	player1.update();
+	if(score2) score2.update();
+	if(goal2) goal2.update();
+	if (player2) player2.update();
 	ball.update();
 }
 
@@ -130,9 +168,9 @@ function checkBallPosition() {
 	
 	//Check if ball is in goal
 	if (ball.x > 700 && ball.y > 150 && ball.y < 350) {
-		points += 1
-		ball.x = Math.random()*500 + 150;
-		ball.y = Math.random()*400 + 50;
+		player1.points += 1
+		ball.x = 400;
+		ball.y = 250;
 	}
 }
 
@@ -140,7 +178,7 @@ function checkBallPosition() {
 
 
 </script>
-<h1 id="message"> Use arrow kes to move and space bar to kick! </h1>
+<h1 id="message"> Use arrow keys to move and space bar to kick! </h1>
 </body>
 
 </html>
