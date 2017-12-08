@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+	border: 1px solid #d3d3d3;
+	background-color: #f1f1f1;
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBS3KiF_kDKclhxeXZMZSQbhqS_Hdtda84",
+    authDomain: "quantumsoccer-8eac7.firebaseapp.com",
+    databaseURL: "https://quantumsoccer-8eac7.firebaseio.com",
+    projectId: "quantumsoccer-8eac7",
+    storageBucket: "quantumsoccer-8eac7.appspot.com",
+    messagingSenderId: "530051774265"
+  };
+  firebase.initializeApp(config);
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+<!-- AngularFire -->
+<script src="https://cdn.firebase.com/libs/angularfire/2.1.0/angularfire.min.js"></script>
+<!-- Your Javascript -->
+
+</head>
+<body onload="startGame()">
+
+<script>
+var player1;
+var ball;
+function startGame() {
+  myGameArea.start();
+  ball = new component(40, 40, "ball.svg", 200, 175, "image");
+  player1 = new component(30, 30, "red", 175, 175);
+}
+
+var myGameArea = {
+	canvas: document.createElement("canvas"),
+	start : function() {
+		this.canvas.width = 600;
+		this.canvas.height = 400;
+		this.context = this.canvas.getContext("2d");
+		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+		this.interval = setInterval(updateGameArea, 20);
+		window.addEventListener('keydown', function(e) {
+			myGameArea.keys = (myGameArea.keys || []);
+			myGameArea.keys[e.keyCode] = true;
+		})
+		window.addEventListener('keyup', function(e) {
+			myGameArea.keys[e.keyCode] = false;
+		})
+	},
+	clear : function() {
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	}
+}
+
+function component(width, height, color, x, y, type) {
+	this.type = type;
+        if(type == "image") {
+		this.image = new Image();
+		this.image.src = color;
+	}
+	this.width = width;
+	this.height = height;
+	this.x = x;
+	this.y = y;
+	this.update = function(player) {
+		if (type == "image") {
+			ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+		} else {
+			ctx = myGameArea.context;
+			ctx.fillStyle = color;
+			ctx.fillRect(this.x, this.y, this.width, this.height);
+		}
+	}
+}
+function updateGameArea() {
+	myGameArea.clear();
+	if(myGameArea.keys) {
+		if (myGameArea.keys[37]) {player1.x -= 4;}
+		if (myGameArea.keys[39]) {player1.x += 4;}
+		if (myGameArea.keys[38]) {player1.y -= 4;}
+		if (myGameArea.keys[40]) {player1.y += 4;}
+                if (myGameArea.keys[32]) {
+			console.log("space pushed")
+			if (player1.x >= ball.x - player1.width &&
+                            player1.x <= ball.x + ball.width + player1.width/3 &&
+			    player1.y <= ball.y + ball.height + player1.height/3 && 
+			    player1.y >= ball.y - player1.height) {
+				console.log("player close to ball")
+				ball.x += 3 * (ball.x - player1.x)
+				ball.y += 3 * (ball.y - player1.y)
+			}
+		}
+	}
+	if (player1.x < 0) player1.x = 0;
+	if (player1.y < 0) player1.y = 0;
+	if (player1.x > myGameArea.canvas.width) player1.x = myGameArea.canvas.width;
+	if (player1.y > myGameArea.canvas.height) player1.y = myGameArea.canvas.height;
+	if (ball.x < 0
+	player1.update();
+	ball.update();
+}
+
+
+</script>
+<h1 id="message"> Use arrow kes to move and space bar to kick! </h1>
+</body>
+
+</html>
