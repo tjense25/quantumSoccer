@@ -33,11 +33,14 @@ canvas {
 var goal;
 var ball;
 var player1;
+var score;
+var points = 0;
 function startGame() {
   myGameArea.start();
   goal = new component(100, 200, "#39FF14", 700, 175);
   ball = new component(40, 40, "ball.png", 200, 175, "image");
   player1 = new component(30, 30, "cyan", 175, 175);
+//  score = new component("30px", "Consolas", "white", 600, 50, "text");
 }
 
 var myGameArea = {
@@ -63,20 +66,24 @@ var myGameArea = {
 
 function component(width, height, color, x, y, type) {
 	this.type = type;
-        if(type == "image") {
+        if (type == "image") {
 		this.image = new Image();
 		this.image.src = color;
+	} else if (type == "text") {
+		ctx.font = this.width + " " + this.height;
 	}
 	this.width = width;
 	this.height = height;
 	this.x = x;
 	this.y = y;
 	this.update = function(player) {
+		ctx = myGameArea.context;
 		if (type == "image") {
-			ctx = myGameArea.context;
 			ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+		} else if (type == "text") {
+			ctx.fillStyle = color;
+			ctx.fillRect(this.x, this.y, this.width, this.height);
 		} else {
-			ctx = myGameArea.context;
 			ctx.fillStyle = color;
 			ctx.fillRect(this.x, this.y, this.width, this.height);
 		}
@@ -90,30 +97,46 @@ function updateGameArea() {
 		if (myGameArea.keys[38]) {player1.y -= 4;}
 		if (myGameArea.keys[40]) {player1.y += 4;}
                 if (myGameArea.keys[32]) {
-			console.log("space pushed")
 			if (player1.x >= ball.x - player1.width &&
                             player1.x <= ball.x + ball.width + player1.width/3 &&
 			    player1.y <= ball.y + ball.height + player1.height/3 && 
 			    player1.y >= ball.y - player1.height) {
-				console.log("player close to ball")
 				ball.x += 3 * (ball.x - player1.x)
 				ball.y += 3 * (ball.y - player1.y)
 			}
 		}
 	}
-	if (player1.x < -player1.width) player1.x = -player1.width;
-	if (player1.y < -player1.height) player1.y = -player1.height;
-	if (player1.x > myGameArea.canvas.width) player1.x = myGameArea.canvas.width;
-	if (player1.y > myGameArea.canvas.height) player1.y = myGameArea.canvas.height;
-	if (ball.x < 0 || ball.y < 0 || ball.x > myGameArea.canvas.width - ball.width || ball.y > myGameArea.canvas.height - ball.height) {
-		document.getElementById("message").text = "Ball Out of Bounds!";
-		ball.x = 200;
-		ball.y = 175;
-	}
+	checkPlayerPosition();
+	checkBallPosition();	
+//	score.text = "Score: " + points;
+//	score.update();
 	goal.update();
 	player1.update();
 	ball.update();
 }
+
+function checkPlayerPosition() {
+	if (player1.x < -player1.width) player1.x = -player1.width;
+	if (player1.y < -player1.height) player1.y = -player1.height;
+	if (player1.x > myGameArea.canvas.width) player1.x = myGameArea.canvas.width;
+	if (player1.y > myGameArea.canvas.height) player1.y = myGameArea.canvas.height;
+}
+
+function checkBallPosition() {
+	if (ball.x < 0) ball.x = 0; 
+	if (ball.y < 0) ball.y = 0;
+	if (ball.x > myGameArea.canvas.width - ball.width) ball.x = myGameArea.canvas.width - ball.width;
+	if (ball.y > myGameArea.canvas.height - ball.height) ball.y = myGameArea.canvas.height - ball.height;
+	
+	//Check if ball is in goal
+	if (ball.x > 700 && ball.y > 150 && ball.y < 350) {
+		points += 1
+		ball.x = Math.random()*500 + 150;
+		ball.y = Math.random()*400 + 50;
+	}
+}
+
+	
 
 
 </script>
