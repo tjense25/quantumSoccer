@@ -52,8 +52,9 @@ function startGame() {
 	if (data.key == "ball") {
 		ball = new component(comp.width, comp.height, comp.color, comp.x, comp.y, comp.type)	
 	} else if (data.key != uuid) {
-		player2 = new component(comp.width, comp.height, comp.color, comp.x, comp.y)
 		goal2 = new component(100, 200, comp.color, 0, 175);
+		player2 = new component(comp.width, comp.height, comp.color, comp.x, comp.y)
+		player1 = new component(player1.width, player1.height, player1.color, player1.x, player1.y)
 		score2 = new component("30px", "Consolas", "white", 50, 50, "text");
 	}
 
@@ -168,10 +169,16 @@ function checkBallPosition() {
 	
 	//Check if ball is in goal
 	if (ball.x > 700 && ball.y > 150 && ball.y < 350) {
-		player1.points += 1
+		player1.points += 1;
 		ball.x = 400;
 		ball.y = 250;
 	}
+	if (player2 && ball.x < 100 && ball.y > 150 && ball.y < 350) {
+		player2.points += 1;
+		ball.x = 400;
+		ball.y = 250;
+	}
+		
 }
 
 	
