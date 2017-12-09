@@ -5,7 +5,8 @@
 <style>
 canvas {
 	border: 1px solid #d3d3d3;
-	background-color: black;
+	background: radial-gradient(rgba(0, 0, 0, .6), rgba(0, 0, 0, .9));	
+	display: block;
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
@@ -27,37 +28,85 @@ canvas {
 <!-- Your Javascript -->
 <script src="script.js"></script>
 </head>
-<body onload="startGame()">
+<body>
 
 <script>
+var gameId;
+var player;
 var goal1;
 var goal2;
 var ball;
 var player1;
 var player2;
-var uuid = createUUID();
-console.log(uuid);
 var score1;
 var score2;
+var points1 = 0;
+var points2 = 0;
+var color1 = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+var color2 = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+var db = firebase.database()
+db.ref('waiting').orderByChild('gameId').once('value', function(snapshot) {
+	if (snapshot.val()) {
+		gameId = snapshot.val().gameId;
+		console.log(gameId);
+		player = 2;
+		snapshot.ref.remove();
+		db.ref('games/' + gameId).set({ready: "true"});
+		syncToGame();
+	}
+	else {
+		gameId = createUUID();
+		player = 1;
+		db.ref('waiting').set({gameId: gameId});
+		waitForOponent();
+	}
+});
+
+function waitForOponent() {
+	var ref = db.ref('games/' + gameId);
+	ref.orderByKey().once("child_changed", function(snapshot) {
+		startGame();
+	});
+}
+
 function startGame() {
   myGameArea.start();
-  var color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
-  goal1 = new component(100, 200, color, 700, 175);
-  ball = new component(40, 40, "ball.png", 200, 175, "image");
-  player1 = new component(30, 30, color, 175, 175);
+  goal1 = new component(100, 200, color1, 700, 175);
+  goal2 = new component(100, 200, color2, 0, 175);
+  ball = new component(40, 40, "ball.png", 400, 250, "image");
+  player1 = new component(30, 30, color1, 350, 250);
+  player2 = new component(30, 30, color2, 450, 250)
   score1  = new component("30px", "Consolas", "white", 650, 50, "text");
-  var ref = firebase.database().ref('comp')
-  ref.orderByKey().on("child_changed", function(data) {
-	var comp = data.val()
-	if (data.key == "ball") {
-		ball = new component(comp.width, comp.height, comp.color, comp.x, comp.y, comp.type)	
-	} else if (data.key != uuid) {
-		goal2 = new component(100, 200, comp.color, 0, 175);
-		player2 = new component(comp.width, comp.height, comp.color, comp.x, comp.y)
-		player1 = new component(player1.width, player1.height, player1.color, player1.x, player1.y)
-		score2 = new component("30px", "Consolas", "white", 50, 50, "text");
-	}
+  score2 = new component("30px", "Consolas", "white", 50, 50, "text");
+  setDBListeners();
+}
 
+function syncToGame() {
+  myGameArea.start();
+  goal1 = new component(100, 200, color1, 700, 175);
+  goal2 = new component(100, 200, color2, 0, 175);
+  ball = new component(40, 40, "ball.png", 400, 250, "image");
+  player1 = new component(30, 30, color1, 350, 250);
+  player2 = new component(30, 30, color2, 450, 250)
+  score1  = new component("30px", "Consolas", "white", 650, 50, "text");
+  score2 = new component("30px", "Consolas", "white", 50, 50, "text");
+  score1  = new component("30px", "Consolas", "white", 650, 50, "text");
+  score2 = new component("30px", "Consolas", "white", 50, 50, "text");
+  setDBListeners();
+}
+
+function setDBListeners() {	
+	var ref = db.ref('games/' + gameId + "/comp")
+	ref.orderByKey().on("child_changed", function(data) {
+	var comp = data.val()
+	console.log(data.key);
+	if (data.key == "ball") {
+		ball = new component(40, 40, "ball.png", comp.x, comp.y, "image")	
+	} else if (data.key == "1" && player == 2) {
+		player1 = new component(30, 30, color1, comp.x, comp.y);
+	} else if (data.key == "2" && player == 1) {
+		player2 = new component(30, 30, color2, comp.x, comp.y);
+	}
   });
 }
 
@@ -83,9 +132,6 @@ var myGameArea = {
 }
 
 function component(width, height, color, x, y, type) {
-	this.type = type;
-	this.color = color;
-	this.points = 0;
         if (type == "image") {
 		this.image = new Image();
 		this.image.src = color;
@@ -108,57 +154,65 @@ function component(width, height, color, x, y, type) {
 		}
 	}
 }
-function updateGameArea() {
-	myGameArea.clear();
-	if(myGameArea.keys) {
-		if (myGameArea.keys[37]) {player1.x -= 4;}
-		if (myGameArea.keys[39]) {player1.x += 4;}
-		if (myGameArea.keys[38]) {player1.y -= 4;}
-		if (myGameArea.keys[40]) {player1.y += 4;}
-                if (myGameArea.keys[32]) {
-			if (player1.x >= ball.x - player1.width &&
-                            player1.x <= ball.x + ball.width + player1.width/3 &&
-			    player1.y <= ball.y + ball.height + player1.height/3 && 
-			    player1.y >= ball.y - player1.height) {
-				ball.x += 3 * (ball.x - player1.x)
-				ball.y += 3 * (ball.y - player1.y)
-				firebase.database().ref('comp/ball/').set({
-					width: ball.width,
-					height: ball.height,
-					color: ball.color,
-					x: ball.x,
-					y: ball.y,
-					type: "image"
-				});
-			}
+
+function move(play) {
+	if (myGameArea.keys[37]) {play.x -= 3;}
+	if (myGameArea.keys[39]) {play.x += 3;}
+	if (myGameArea.keys[38]) {play.y -= 3;}
+	if (myGameArea.keys[40]) {play.y += 3;}
+	if (myGameArea.keys[32]) {
+		if (play.x >= ball.x - play.width &&
+		    play.x <= ball.x + ball.width + play.width/3 &&
+		    play.y <= ball.y + ball.height + play.height/3 && 
+		    play.y >= ball.y - play.height) {
+			ball.x += 3 * (ball.x - play.x)
+			ball.y += 3 * (ball.y - play.y)
+			var ref = db.ref('games/' + gameId + '/comp/ball')
+			ref.set({
+				x: ball.x,
+				y: ball.y,
+			});
 		}
 	}
-	checkPlayerPosition();
-	checkBallPosition();	
-	score1.text = "SCORE: " + player1.points;
-	if(score2) score2.text = "SCORE: " + player2.points;
-	firebase.database().ref('comp/' + uuid + '/').set({
-		width: player1.width,
-		height: player1.height,
-		color: player1.color,
-		x: player1.x,
-		y: player1.y,
-		score: player1.points
-	});
-	score1.update();
-	goal1.update();
-	player1.update();
-	if(score2) score2.update();
-	if(goal2) goal2.update();
-	if (player2) player2.update();
-	ball.update();
 }
 
-function checkPlayerPosition() {
-	if (player1.x < -player1.width) player1.x = -player1.width;
-	if (player1.y < -player1.height) player1.y = -player1.height;
-	if (player1.x > myGameArea.canvas.width) player1.x = myGameArea.canvas.width;
-	if (player1.y > myGameArea.canvas.height) player1.y = myGameArea.canvas.height;
+function updateGameArea() {
+	myGameArea.clear();
+	if (myGameArea.keys) {
+		if (player == 1) {
+			 move(player1);
+			 checkPlayerPosition(player1);
+		} else  {
+			move(player2)
+			checkPlayerPosition(player2);
+		}
+	}
+	checkBallPosition();	
+	score1.text = "SCORE: " + points1;
+	score2.text = "SCORE: " + points2;
+	var ref = db.ref('games/' + gameId + '/comp/' + player);
+	ref.set({
+		x: player == 1 ? player1.x : player2.x,
+		y: player == 1 ? player1.y : player2.y,
+	});
+	score1.update();
+	score2.update();
+	goal1.update();
+	goal2.update();
+	player1.update();
+	player2.update();
+	ball.update();
+	if (points1 == 7 || points2 == 7) {
+		clearInterval(myGameArea.interval);
+		gameOver();
+	}
+}
+
+function checkPlayerPosition(play) {
+	if (play.x < -play.width + 1) play.x = -play.width + 1;
+	if (play.y < -play.height + 1) play.y = -play.height + 1;
+	if (play.x > myGameArea.canvas.width - 1) play.x = myGameArea.canvas.width - 1;
+	if (play.y > myGameArea.canvas.height - 1) play.y = myGameArea.canvas.height - 1;
 }
 
 function checkBallPosition() {
@@ -167,20 +221,40 @@ function checkBallPosition() {
 	if (ball.x > myGameArea.canvas.width - ball.width) ball.x = myGameArea.canvas.width - ball.width;
 	if (ball.y > myGameArea.canvas.height - ball.height) ball.y = myGameArea.canvas.height - ball.height;
 	
-	//Check if ball is in goal
+	//Check if ball is in goal1
 	if (ball.x > 700 && ball.y > 150 && ball.y < 350) {
-		player1.points += 1;
+		points1  += 1;
 		ball.x = 400;
 		ball.y = 250;
 	}
+	//check to see if ball is in gaol2
 	if (player2 && ball.x < 100 && ball.y > 150 && ball.y < 350) {
-		player2.points += 1;
+		points2 += 1;
 		ball.x = 400;
 		ball.y = 250;
 	}
 		
 }
 
+function gameOver() {
+	myGameArea.clear();
+	var interval = setInterval(winner(), 1000);
+}
+
+function winner() {
+	var text;
+	if (player == 1 && points1 == 7) text = "Congrats! You Won!";
+	else if (player == 2 && points2 == 7) text = "Congrats! You Won!!";
+	else text = "I'm Sorry, you lost :("
+	ctx = myGameArea.context;
+	ctx.font = "50px Consolas";
+	ctx.fillStyle = "white";
+	ctx.fillText(text, 200, 200);
+	ctx.font = "10x Consolas"
+	ctx.fillStyle = "white";
+	ctx.fillText("refresh the page to play again", 50, 275);
+}
+	
 	
 
 
