@@ -5,7 +5,7 @@
 <style>
 canvas {
 	border: 1px solid #d3d3d3;
-	background: radial-gradient(rgba(0, 0, 0, .6), rgba(0, 0, 0, .9));	
+	background: radial-gradient(rgba(0, 0, 0, .7), rgba(0, 0, 0, 1));	
 	display: block;
 }
 </style>
@@ -42,22 +42,27 @@ var score1;
 var score2;
 var points1 = 0;
 var points2 = 0;
-var color1 = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
-var color2 = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+var color1
+var color2
 var db = firebase.database()
 db.ref('waiting').orderByChild('gameId').once('value', function(snapshot) {
 	if (snapshot.val()) {
 		gameId = snapshot.val().gameId;
+		color1 = snapshot.val().color;
 		console.log(gameId);
 		player = 2;
 		snapshot.ref.remove();
 		db.ref('games/' + gameId).set({ready: "true"});
-		syncToGame();
+		startGame();
 	}
 	else {
 		gameId = createUUID();
+		color1 = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
 		player = 1;
-		db.ref('waiting').set({gameId: gameId});
+		db.ref('waiting').set({
+			gameId: gameId, 
+			color: color1
+		});
 		waitForOponent();
 	}
 });
@@ -71,6 +76,7 @@ function waitForOponent() {
 
 function startGame() {
   myGameArea.start();
+  color2 = invertHex(color1);
   goal1 = new component(100, 200, color1, 700, 175);
   goal2 = new component(100, 200, color2, 0, 175);
   ball = new component(40, 40, "ball.png", 400, 250, "image");
@@ -79,20 +85,11 @@ function startGame() {
   score1  = new component("30px", "Consolas", "white", 650, 50, "text");
   score2 = new component("30px", "Consolas", "white", 50, 50, "text");
   setDBListeners();
-}
-
-function syncToGame() {
-  myGameArea.start();
-  goal1 = new component(100, 200, color1, 700, 175);
-  goal2 = new component(100, 200, color2, 0, 175);
-  ball = new component(40, 40, "ball.png", 400, 250, "image");
-  player1 = new component(30, 30, color1, 350, 250);
-  player2 = new component(30, 30, color2, 450, 250)
-  score1  = new component("30px", "Consolas", "white", 650, 50, "text");
-  score2 = new component("30px", "Consolas", "white", 50, 50, "text");
-  score1  = new component("30px", "Consolas", "white", 650, 50, "text");
-  score2 = new component("30px", "Consolas", "white", 50, 50, "text");
-  setDBListeners();
+	var ref = db.ref('games/' + gameId + '/comp/ball')
+	ref.set({
+		x: ball.x,
+		y: ball.y,
+	});
 }
 
 function setDBListeners() {	
@@ -165,8 +162,8 @@ function move(play) {
 		    play.x <= ball.x + ball.width + play.width/3 &&
 		    play.y <= ball.y + ball.height + play.height/3 && 
 		    play.y >= ball.y - play.height) {
-			ball.x += 3 * (ball.x - play.x)
-			ball.y += 3 * (ball.y - play.y)
+			ball.x += 1.5 * (ball.x - play.x)
+			ball.y += 1.5 * (ball.y - play.y)
 			var ref = db.ref('games/' + gameId + '/comp/ball')
 			ref.set({
 				x: ball.x,
@@ -202,7 +199,7 @@ function updateGameArea() {
 	player1.update();
 	player2.update();
 	ball.update();
-	if (points1 == 7 || points2 == 7) {
+	if (points1 == 3 || points2 == 3) {
 		clearInterval(myGameArea.interval);
 		gameOver();
 	}
@@ -243,16 +240,14 @@ function gameOver() {
 
 function winner() {
 	var text;
-	if (player == 1 && points1 == 7) text = "Congrats! You Won!";
-	else if (player == 2 && points2 == 7) text = "Congrats! You Won!!";
+	if (player == 1 && points1 == 3) text = "Congrats! You Won!";
+	else if (player == 2 && points2 == 3) text = "Congrats! You Won!!";
 	else text = "I'm Sorry, you lost :("
 	ctx = myGameArea.context;
-	ctx.font = "50px Consolas";
+	ctx.font = "40px Consolas";
 	ctx.fillStyle = "white";
 	ctx.fillText(text, 200, 200);
-	ctx.font = "10x Consolas"
-	ctx.fillStyle = "white";
-	ctx.fillText("refresh the page to play again", 50, 275);
+	ctx.fillText("refresh the page to play again", 100, 275);
 }
 	
 	
