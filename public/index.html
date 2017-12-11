@@ -27,7 +27,7 @@ canvas {
 <!-- AngularFire -->
 <script src="https://cdn.firebase.com/libs/angularfire/2.1.0/angularfire.min.js"></script>
 <!-- Your Javascript -->
-<script src="script.js"></script>
+<script src="javascripts/script.js"></script>
 </head>
 <body>
 
@@ -45,14 +45,11 @@ var points1 = 0;
 var points2 = 0;
 var color1
 var color2
-
-
 var db = firebase.database()
 db.ref('waiting').orderByKey().once('value', function(snapshot) {
 	if (snapshot.val()) {
 		gameId = snapshot.val().gameId;
 		color1 = snapshot.val().color;
-		console.log(gameId);
 		player = 2;
 		snapshot.ref.remove();
 		db.ref('games/' + gameId).set({ready: "true"});
@@ -85,7 +82,7 @@ function startGame() {
   color2 = invertHex(color1);
   goal1 = new component(100, 200, color1, 700, 175);
   goal2 = new component(100, 200, color2, 0, 175);
-  ball = new component(40, 40, "ball.png", 400, 250, "image");
+  ball = new component(40, 40, "images/ball.png", 400, 250, "image");
   player1 = new component(30, 30, color1, 350, 250);
   player2 = new component(30, 30, color2, 450, 250)
   score1  = new component("30px", "Consolas", "white", 650, 50, "text");
@@ -99,18 +96,16 @@ function startGame() {
 }
 
 function setDBListeners() {	
-	var ref = db.ref('games/' + gameId + "/comp")
+	var ref = db.ref('games/' + gameId + "/comp");
 	ref.orderByKey().on("child_changed", function(data) {
-	var comp = data.val()
-	console.log(data.key);
-	if (data.key == "ball") {
-		ball = new component(40, 40, "ball.png", comp.x, comp.y, "image")	
-	} else if (data.key == "1" && player == 2) {
-		player1 = new component(30, 30, color1, comp.x, comp.y);
-	} else if (data.key == "2" && player == 1) {
-		player2 = new component(30, 30, color2, comp.x, comp.y);
-	}
-  });
+		if (data.key == "ball") {
+			ball = new component(40, 40, "images/ball.png", data.val().x, data.val().y, "image");
+		} else if (player == "1" && data.key == "2") {
+			player2 = new component(30, 30, color2, data.val().x, data.val().y);
+		} else if (player == "2" && data.key == "1") {
+			player1 = new component(30, 30, color1, data.val().x, data.val().y);
+		}
+	}); 
 }
 
 var myGameArea = {
@@ -265,7 +260,7 @@ window.onbeforeunload = function() {
 	clearInterval(myGameArea.interval);
 	myGameArea.clear();
 	deleteGame();
-	return "leave?";
+	return undefined;
 }
 	
 function deleteGame() {

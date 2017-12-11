@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+	<title> Quantum Soccer </title>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css"/>
+	<script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
+	<script>
+	  // Initialize Firebase
+	  var config = {
+	    apiKey: "AIzaSyBS3KiF_kDKclhxeXZMZSQbhqS_Hdtda84",
+	    authDomain: "quantumsoccer-8eac7.firebaseapp.com",
+	    databaseURL: "https://quantumsoccer-8eac7.firebaseio.com",
+	    projectId: "quantumsoccer-8eac7",
+	    storageBucket: "quantumsoccer-8eac7.appspot.com",
+	    messagingSenderId: "530051774265"
+	  };
+	  firebase.initializeApp(config);
+	</script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+	<script src="javascripts/app.js"></script>
+</head>
+
+<body>
+<div ng-controller="Soccer">
+<h1> Quantum Soccer </h1>
+<div id="formdiv">
+<h2> Sign in </h2>
+<form class="form">
+	<input type="text" ng-model="user.name" /><br />
+	<input type="password" ng-model="user.password" /><br />
+	<input class="button" type="submit" ng-click="login(user)" />
+</form>
+<button class=button">Sign in with Google</button> <br>
+New to Quantum Soccer?
+<button class="button">Register</button><br>
+<button class="button">Continue As Anonymous</button>
+</div>
+</div>
+</body>
+
