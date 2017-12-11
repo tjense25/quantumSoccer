@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Quantum Soccer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <style>
 canvas {
@@ -44,8 +45,10 @@ var points1 = 0;
 var points2 = 0;
 var color1
 var color2
+
+
 var db = firebase.database()
-db.ref('waiting').orderByChild('gameId').once('value', function(snapshot) {
+db.ref('waiting').orderByKey().once('value', function(snapshot) {
 	if (snapshot.val()) {
 		gameId = snapshot.val().gameId;
 		color1 = snapshot.val().color;
@@ -54,8 +57,7 @@ db.ref('waiting').orderByChild('gameId').once('value', function(snapshot) {
 		snapshot.ref.remove();
 		db.ref('games/' + gameId).set({ready: "true"});
 		startGame();
-	}
-	else {
+	} else {
 		gameId = createUUID();
 		color1 = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
 		player = 1;
@@ -68,8 +70,12 @@ db.ref('waiting').orderByChild('gameId').once('value', function(snapshot) {
 });
 
 function waitForOponent() {
+	myGameArea.start();
+	clearInterval(myGameArea.interval);
+	myGameArea.interval = setInterval(waiting(), 20);
 	var ref = db.ref('games/' + gameId);
 	ref.orderByKey().once("child_changed", function(snapshot) {
+		clearInterval(myGameArea.interval);
 		startGame();
 	});
 }
@@ -201,7 +207,9 @@ function updateGameArea() {
 	ball.update();
 	if (points1 == 3 || points2 == 3) {
 		clearInterval(myGameArea.interval);
-		gameOver();
+		myGameArea.clear();
+		myGameArea.interval = setInterval(gameOver(), 1000);
+		deleteGame();
 	}
 }
 
@@ -234,24 +242,43 @@ function checkBallPosition() {
 }
 
 function gameOver() {
-	myGameArea.clear();
-	var interval = setInterval(winner(), 1000);
-}
-
-function winner() {
 	var text;
 	if (player == 1 && points1 == 3) text = "Congrats! You Won!";
 	else if (player == 2 && points2 == 3) text = "Congrats! You Won!!";
 	else text = "I'm Sorry, you lost :("
-	ctx = myGameArea.context;
+	var ctx = myGameArea.context;
 	ctx.font = "40px Consolas";
 	ctx.fillStyle = "white";
 	ctx.fillText(text, 200, 200);
 	ctx.fillText("refresh the page to play again", 100, 275);
 }
-	
-	
 
+function waiting() {
+	var text = "Waiting for an Opponent . . ."
+	var ctx = myGameArea.context;
+	ctx.font = "30px Consolas";
+	ctx.fillStyle = "white";
+	ctx.fillText(text, 200, 200);
+}
+
+window.onbeforeunload = function() {
+	clearInterval(myGameArea.interval);
+	myGameArea.clear();
+	deleteGame();
+	return "leave?";
+}
+	
+function deleteGame() {
+	db.ref('waiting').orderByKey().once('value', function(snapshot) {
+		if (snapshot.val() && snapshot.val().gameId == gameId) {
+			snapshot.ref.remove();
+		} else {
+			db.ref('games/' + gameId).orderByKey().once('value', function(snapshot) {
+				snapshot.ref.remove();
+			});
+		}
+	});
+}
 
 </script>
 <h1 id="message"> Use arrow keys to move and space bar to kick! </h1>
