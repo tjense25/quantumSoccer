@@ -34,7 +34,6 @@ canvas {
 <span id="username"> <%= username %> </span>
 <canvas id="canvas"> </canvas>
 <script>
-console.log(document.getElementById("username").innerHTML);
 var gameId;
 var player;
 var goal1;
@@ -80,11 +79,10 @@ db.ref('waiting').orderByKey().once('value', function(snapshot) {
 function waitForOponent() {
 	myGameArea.start();
 	clearInterval(myGameArea.interval);
-	myGameArea.interval = setInterval(waiting(), 20);
+	myGameArea.interval = setInterval(waiting(), 50);
 	var ref = db.ref('games/');
 	ref.orderByKey().once("child_changed", function(snapshot) {
 	    if (snapshot.key == gameId) {
-		console.log(snapshot.val());
 		user2 = snapshot.val().user2;
 		clearInterval(myGameArea.interval);
 		startGame();
@@ -100,7 +98,7 @@ function startGame() {
   ball = new component(40, 40, "images/ball.png", 400, 250, "image");
   player1 = new component(30, 30, color1, 350, 250);
   player2 = new component(30, 30, color2, 450, 250)
-  score1  = new component("30px", "Consolas", "white", 500, 50, "text");
+  score1  = new component("30px", "Consolas", "white", 795, 50, "text", true);
   score2 = new component("30px", "Consolas", "white", 5, 50, "text");
   setDBListeners();
 	var ref = db.ref('games/' + gameId + '/comp/ball')
@@ -130,7 +128,7 @@ var myGameArea = {
 		this.canvas.height = 500;
 		this.frameNo = 0;
 		this.context = this.canvas.getContext("2d");
-		this.interval = setInterval(updateGameArea, 20);
+		this.interval = setInterval(updateGameArea, 40);
 		window.addEventListener('keydown', function(e) {
 			myGameArea.keys = (myGameArea.keys || []);
 			myGameArea.keys[e.keyCode] = true;
@@ -144,7 +142,7 @@ var myGameArea = {
 	}
 }
 
-function component(width, height, color, x, y, type) {
+function component(width, height, color, x, y, type, right) {
         if (type == "image") {
 		this.image = new Image();
 		this.image.src = color;
@@ -160,6 +158,8 @@ function component(width, height, color, x, y, type) {
 		} else if (type == "text") {
 			ctx.font = this.width + " " + this.height;
 			ctx.fillStyle = color;
+			if (right) ctx.textAlign = "right";
+			else ctx.textAlign = "left";
 			ctx.fillText(this.text, this.x, this.y);
 		} else {
 			ctx.fillStyle = color;
@@ -169,17 +169,17 @@ function component(width, height, color, x, y, type) {
 }
 
 function move(play) {
-	if (myGameArea.keys[37]) {play.x -= 3;}
-	if (myGameArea.keys[39]) {play.x += 3;}
-	if (myGameArea.keys[38]) {play.y -= 3;}
-	if (myGameArea.keys[40]) {play.y += 3;}
+	if (myGameArea.keys[37]) {play.x -= 5;}
+	if (myGameArea.keys[39]) {play.x += 5;}
+	if (myGameArea.keys[38]) {play.y -= 5;}
+	if (myGameArea.keys[40]) {play.y += 5;}
 	if (myGameArea.keys[32]) {
 		if (play.x >= ball.x - play.width &&
 		    play.x <= ball.x + ball.width + play.width/3 &&
 		    play.y <= ball.y + ball.height + play.height/3 && 
 		    play.y >= ball.y - play.height) {
-			ball.x += 1.5 * (ball.x - play.x)
-			ball.y += 1.5 * (ball.y - play.y)
+			ball.x += 2 * (ball.x - play.x)
+			ball.y += 2 * (ball.y - play.y)
 			var ref = db.ref('games/' + gameId + '/comp/ball')
 			ref.set({
 				x: ball.x,
@@ -215,17 +215,12 @@ function updateGameArea() {
 	goal2.update();
 	player1.update();
 	player2.update();
-	if (goalScoredFrame != 0 && myGameArea.frameNo < goalScoredFrame + 30) {
+	if (goalScoredFrame != 0 && myGameArea.frameNo < goalScoredFrame + 15) {
 		goooaall.update();
 	} else if (goalScoredFrame != 0) {
 		ball.x = 400;
 		ball.y = 250;
-		var ref = db.ref('games/' + gameId + '/comp/ball')
-		ref.set({
-			x: ball.x,
-			y: ball.y,
-		});
-		goalSoredFrame = 0;
+		goalScoredFrame = 0;
 	}
 	ball.update();
 	if (points1 == 3 || points2 == 3) {
@@ -250,17 +245,17 @@ function checkBallPosition() {
 	if (ball.y > myGameArea.canvas.height - ball.height) ball.y = myGameArea.canvas.height - ball.height;
 	
 	//Check if ball is in goal1
-	if (ball.x > 700 && ball.y > 150 && ball.y < 350) {
+	if (ball.x > 690 && ball.y > 150 && ball.y < 350 - ball.height) {
 		points1  += 1;
 		goalScoredFrame = myGameArea.frameNo;
-		goooaall = new component("50px", "Consolas", color1, 200, 250, "text");
+		goooaall = new component("50px", "Consolas", color1, 250, 250, "text");
 		goooaall.text = "GOOOOAAALL!!";
 	}
 	//check to see if ball is in gaol2
-	if (player2 && ball.x < 100 && ball.y > 150 && ball.y < 350) {
+	if (player2 && ball.x < 110 - ball.width  && ball.y > 150 && ball.y < 350 - ball.height) {
 		points2 += 1;
 		goalScoredFrame = myGameArea.frameNo;
-		goooaall = new component("50px", "Consolas", color2, 200, 250, "text");
+		goooaall = new component("50px", "Consolas", color2, 250, 250, "text");
 		goooaall.text = "GOOOOAAALL!!";
 	}
 		

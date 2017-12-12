@@ -16,8 +16,7 @@ function createUUID() {
 function invertHex(hexnum){
   hexnum = hexnum.substring(1);
   if(hexnum.length != 6) {
-    alert("Hex color must be six hex numbers in length.");
-    return false;
+    hexnum = "ABCDEF";
   }
 	
   hexnum = hexnum.toUpperCase();
