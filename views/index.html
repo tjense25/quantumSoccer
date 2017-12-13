@@ -1,27 +1,31 @@
-<!doctype html>
-<html ng-app="myApp"> 
-    
+<html>
 <head>
-    <title>Quantum Soccer</title>
-    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
+<title>Quantum Soccer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
+<script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBS3KiF_kDKclhxeXZMZSQbhqS_Hdtda84",
+    authDomain: "quantumsoccer-8eac7.firebaseapp.com",
+    databaseURL: "https://quantumsoccer-8eac7.firebaseio.com",
+    projectId: "quantumsoccer-8eac7",
+    storageBucket: "quantumsoccer-8eac7.appspot.com",
+    messagingSenderId: "530051774265"
+  };
+  firebase.initializeApp(config);
+</script>
+<script src="javascripts/script.js"></script>
 </head>
-        
-<body>  
-    <div class="content">
-    <div ng-controller="myController">
-	<h1> Quantum Soccer </h1>
-        <h4 id="welcomeText">Logged in as:
-            <%= username %>
-        </h4>
-	<form action="/multi"><input type="submit" class="button" value="Play Quantum Soccer"/></form>
-	<form action="/multi"><input type="submit" class="button" value="Play Classical Soccer"/></form>
-	<form action="/multi"><input type="submit" class="button" value="Practice"/> </form>
-	<form action="/multi"><input type="submit" class="button" value="How to Play"/></form>
-	<form action="/logout"><input type="submit" class="button" value="Logout!"/></form>
-    </div>
-    </div>
-    <script src="http://code.angularjs.org/1.2.9/angular.min.js"></script>
-    <script src="/javascripts/my_app.js"></script>
+<body>
+<div id="header">
+<h1> Quantum S</h1> <img src="/images/ball.png"/> <h1>ccer</h1>
+<a class="logout" href="/logout"/>Logout!</a>
+<h1 id="hello">Hello, &nbsp<span id="username"> <%= username %> </span></h1>
+</div>
+<canvas id="canvas"> </canvas>
+<script src="javascripts/game.js"></script>
 </body>
-      
+
 </html>

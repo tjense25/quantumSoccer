@@ -1,41 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Quantum Soccer</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<style>
-canvas {
-	border: 1px solid #d3d3d3;
-	background: radial-gradient(rgba(0, 0, 0, .65), rgba(0, 0, 0, 1));	
-	display: block;
-        margin: auto;
-}
-</style>
-<link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
-<script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
-<script>
-  // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyBS3KiF_kDKclhxeXZMZSQbhqS_Hdtda84",
-    authDomain: "quantumsoccer-8eac7.firebaseapp.com",
-    databaseURL: "https://quantumsoccer-8eac7.firebaseio.com",
-    projectId: "quantumsoccer-8eac7",
-    storageBucket: "quantumsoccer-8eac7.appspot.com",
-    messagingSenderId: "530051774265"
-  };
-  firebase.initializeApp(config);
-</script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
-<!-- AngularFire -->
-<script src="https://cdn.firebase.com/libs/angularfire/2.1.0/angularfire.min.js"></script>
-<!-- Your Javascript -->
-<script src="javascripts/script.js"></script>
-</head>
-<body>
-<h1> Quantum Soccer </h1> 
-<span id="username"> <%= username %> </span>
-<canvas id="canvas"> </canvas>
-<script>
 var gameId;
 var player;
 var goal1;
@@ -77,7 +39,6 @@ db.ref('waiting').orderByKey().once('value', function(snapshot) {
 		waitForOponent();
 	}
 });
-
 function waitForOponent() {
 	myGameArea.start();
 	clearInterval(myGameArea.interval);
@@ -91,7 +52,6 @@ function waitForOponent() {
 	    }
 	});
 }
-
 function startGame() {
   myGameArea.start();
   color2 = invertHex(color1);
@@ -109,7 +69,6 @@ function startGame() {
 		y: ball.y,
 	});
 }
-
 function setDBListeners() {	
 	var ref = db.ref('games/' + gameId + "/comp");
 	ref.orderByKey().on("child_changed", function(data) {
@@ -122,7 +81,6 @@ function setDBListeners() {
 		}
 	}); 
 }
-
 var myGameArea = {
 	canvas: document.getElementById("canvas"),
 	start : function() {
@@ -143,7 +101,6 @@ var myGameArea = {
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 }
-
 function component(width, height, color, x, y, type, right) {
         if (type == "image") {
 		this.image = new Image();
@@ -169,7 +126,6 @@ function component(width, height, color, x, y, type, right) {
 		}
 	}
 }
-
 function move(play) {
 	if (myGameArea.keys[37]) {play.x -= 3;}
 	if (myGameArea.keys[39]) {play.x += 3;}
@@ -190,7 +146,6 @@ function move(play) {
 		}
 	}
 }
-
 function updateGameArea() {
 	myGameArea.clear();
 	myGameArea.frameNo += 1;
@@ -232,14 +187,12 @@ function updateGameArea() {
 		deleteGame();
 	}
 }
-
 function checkPlayerPosition(play) {
 	if (play.x < -play.width + 1) play.x = -play.width + 1;
 	if (play.y < -play.height + 1) play.y = -play.height + 1;
 	if (play.x > myGameArea.canvas.width - 1) play.x = myGameArea.canvas.width - 1;
 	if (play.y > myGameArea.canvas.height - 1) play.y = myGameArea.canvas.height - 1;
 }
-
 function checkBallPosition() {
 	if (ball.x < 0) ball.x = 0; 
 	if (ball.y < 0) ball.y = 0;
@@ -262,9 +215,7 @@ function checkBallPosition() {
 	}
 		
 }
-
 	
-
 function gameOver() {
 	var text;
 	if (player == 1 && points1 == 3) text = "Congrats! You Won!";
@@ -276,7 +227,6 @@ function gameOver() {
 	ctx.fillText(text, 200, 200);
 	ctx.fillText("refresh the page to play again", 100, 275);
 }
-
 function waiting() {
 	var text = "Waiting for an Opponent . . ."
 	var ctx = myGameArea.context;
@@ -284,7 +234,6 @@ function waiting() {
 	ctx.fillStyle = "white";
 	ctx.fillText(text, 200, 200);
 }
-
 window.onbeforeunload = function() {
 	clearInterval(myGameArea.interval);
 	myGameArea.clear();
@@ -303,8 +252,3 @@ function deleteGame() {
 		}
 	});
 }
-
-</script>
-</body>
-
-</html>

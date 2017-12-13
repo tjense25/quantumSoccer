@@ -19,15 +19,6 @@ router.get('/', function(req, res){
       res.redirect('/login');
     }
 });
-router.get('/multi', function(req, res){
-    console.log("/multi Route");
-    if (req.session.user) {
-      res.render('multi', {username: req.session.username});
-    } else {
-      req.session.msg = 'Access denied!';
-      res.redirect('/login');
-    }
-});
 router.get('/signup', function(req, res){
     console.log("/signup Route");
     if(req.session.user){

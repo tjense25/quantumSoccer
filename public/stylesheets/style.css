@@ -1,54 +1,97 @@
+html {
+  height: 100%
+}
+
 body {
-  background-color: black;
-  padding: 20px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  text-align: center;
+  height: 100%;
+  background: radial-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, .65));	
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  margin: 0;
+  font: 30px "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: white;
 }
 
 h1{
    color: cyan;
    font-size: 40px;
+   display: inline-block;
+}
+
+#hello{
+    color: white;
+    font-size: 30px;
+    float: right;
+}
+
+canvas {
+	border: 1px solid #d3d3d3;
+        background-color: black;
+	display: block;
+        margin: auto;
+}
+
+img {
+   height: 40px;
+   width: 40px;
+   display: inline-block;
+}
+
+#header{
+   top: 0;
+   right: 0;
+   margin: 0;
+   margin-bottom: 100px;
+   background-color: black;
+   padding: 20px;
+   border-bottom: 1px solid white;
 }
 
 .content {
-	width: 50%;
+	width: 35%;
 	margin: 200px auto;
 	padding: 20px;
 	background-color: black;
+	opacity: 0.8;
 	color: white;
 }
 
-input{
-  width: 80%;
-  padding: 10px;
-  font-size: 20px;
+input {
+   font-size: 30px;
+   padding: 5px;
+   width: 80%;
 }
 
-.button{
-  font-size: 20px;
-  width: 80%;
-  text-decoration: none;
-  padding: 10px;
-  background: #00B7FF;
+.button {
+  background-color: cyan;
   color: white;
-  margin: auto;
-  margin-bottom: 10px;
-  border: none;
+  width: 82%;
+  margin-bottom: 20px;
 }
+
+.button:hover{
+   background-color: blue;
+}
+
+.logout{
+   margin-left: 20px;
+   background-color: cyan;
+   color: white;
+   float:right;
+}
+
+.logout:hover{
+  background-color:blue;
+} 
 
 a{
-  font-size: 20px;
-  font-weight: bold;
-  width: 80%;
   text-decoration: none;
-  padding: 20px;
-  background: #00B7FF;
+  padding: 10px;
+  background: cyan;
   color: white;
-  margin: auto;
+  margin: 5px;
   border: none;
 }
-
-a:hover, .button:hover{
-  background: blue;
+a:hover{
+ background: blue;
 }
-

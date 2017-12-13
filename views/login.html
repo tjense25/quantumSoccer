@@ -2,19 +2,20 @@
 <html>
     
 <head>
-    <title>User Login and Sessions</title>
+    <title>Quantum Soccer Login</title>
     <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
 </head>
         
 <body>  
+    <div id="header">
+	<h1> Quantum S</h1> <img src="/images/ball.png"/> <h1>ccer</h1>
+    </div>
     <div class="content">
     <div class="form-container">
-        <h1>Login</h1>
+        <h2>Login</h2>
         <form method="POST" action="/login">
-            <label>Username:</label>
-            <input type="text" id="username" name="username"><br>
-            <label>Password:</label>
-            <input type="password" id="password" name="password"><br>
+            <input type="text" id="username" name="username" placeholder="Username"><br>
+            <input type="password" id="password" name="password" placeholder="Password"><br>
             <input type="submit" class="button" id="login" value="Login">
         </form>
     </div>
