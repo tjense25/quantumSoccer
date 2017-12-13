@@ -6,10 +6,12 @@
 <style>
 canvas {
 	border: 1px solid #d3d3d3;
-	background: radial-gradient(rgba(0, 0, 0, .7), rgba(0, 0, 0, 1));	
+	background: radial-gradient(rgba(0, 0, 0, .65), rgba(0, 0, 0, 1));	
 	display: block;
+        margin: auto;
 }
 </style>
+<link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
 <script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
 <script>
   // Initialize Firebase
@@ -128,7 +130,7 @@ var myGameArea = {
 		this.canvas.height = 500;
 		this.frameNo = 0;
 		this.context = this.canvas.getContext("2d");
-		this.interval = setInterval(updateGameArea, 40);
+		this.interval = setInterval(updateGameArea, 20);
 		window.addEventListener('keydown', function(e) {
 			myGameArea.keys = (myGameArea.keys || []);
 			myGameArea.keys[e.keyCode] = true;
@@ -169,10 +171,10 @@ function component(width, height, color, x, y, type, right) {
 }
 
 function move(play) {
-	if (myGameArea.keys[37]) {play.x -= 5;}
-	if (myGameArea.keys[39]) {play.x += 5;}
-	if (myGameArea.keys[38]) {play.y -= 5;}
-	if (myGameArea.keys[40]) {play.y += 5;}
+	if (myGameArea.keys[37]) {play.x -= 3;}
+	if (myGameArea.keys[39]) {play.x += 3;}
+	if (myGameArea.keys[38]) {play.y -= 3;}
+	if (myGameArea.keys[40]) {play.y += 3;}
 	if (myGameArea.keys[32]) {
 		if (play.x >= ball.x - play.width &&
 		    play.x <= ball.x + ball.width + play.width/3 &&
@@ -215,7 +217,7 @@ function updateGameArea() {
 	goal2.update();
 	player1.update();
 	player2.update();
-	if (goalScoredFrame != 0 && myGameArea.frameNo < goalScoredFrame + 15) {
+	if (goalScoredFrame != 0 && myGameArea.frameNo < goalScoredFrame + 30) {
 		goooaall.update();
 	} else if (goalScoredFrame != 0) {
 		ball.x = 400;
@@ -303,7 +305,6 @@ function deleteGame() {
 }
 
 </script>
-<h1 id="message"> Use arrow keys to move and space bar to kick! </h1>
 </body>
 
 </html>

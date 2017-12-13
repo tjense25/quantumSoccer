@@ -2,26 +2,23 @@
 <html ng-app="myApp"> 
     
 <head>
-    <title>User Login and Sessions</title>
+    <title>Quantum Soccer</title>
     <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
 </head>
         
 <body>  
     <div class="content">
     <div ng-controller="myController">
-        <h1 id="welcomeText">Hello, 
+	<h1> Quantum Soccer </h1>
+        <h4 id="welcomeText">Logged in as:
             <%= username %>
-        </h1>
-        <a id="logoutLink" href="/logout">logout</a>
-        <a id="multiLink" href="/multi">Play</a>
-        <p>Place Your Code Here
-            <p>
+        </h4>
+	<form action="/multi"><input type="submit" class="button" value="Play Quantum Soccer"/></form>
+	<form action="/multi"><input type="submit" class="button" value="Play Classical Soccer"/></form>
+	<form action="/multi"><input type="submit" class="button" value="Practice"/> </form>
+	<form action="/multi"><input type="submit" class="button" value="How to Play"/></form>
+	<form action="/logout"><input type="submit" class="button" value="Logout!"/></form>
     </div>
-    <hr>
-    <span id="indexMsg">
-        <%= msg %>
-    </span>
-    <hr>
     </div>
     <script src="http://code.angularjs.org/1.2.9/angular.min.js"></script>
     <script src="/javascripts/my_app.js"></script>
